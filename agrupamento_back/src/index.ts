@@ -1,8 +1,8 @@
 import express from "express";
 import multer from "multer";
 import readExcel from "./functions/readExcel";
-import dissimilaridade from "./functions/dissimilaridade";
-import { Data } from "./types";
+import { ExcelData } from "./types";
+import divisivo from "./functions/divisivo";
 
 const upload = multer({ dest: "./public/" });
 
@@ -13,11 +13,11 @@ app.post("/data", upload.single("excel"), (req, res) => {
 
     if (!excel) return res.status(400).send("Nenhum arquivo foi enviado.");
 
-    const data: Data[] = readExcel(excel.path) as Data[];
+    const data: ExcelData[] = readExcel(excel.path) as ExcelData[];
 
-    const dissimilarity = dissimilaridade(data);
+    const divisive = divisivo(data);
 
-    res.send(dissimilarity);
+    res.send(divisive);
 });
 
 app.listen(3001, () => {

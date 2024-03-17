@@ -1,6 +1,6 @@
-import { Data } from "../types";
+import { ExcelData } from "../types";
 
-function distanciaEuclidiana(d1: Data, d2: Data): number {
+function distanciaEuclidiana(d1: ExcelData, d2: ExcelData): number {
     const _d1 = Object.keys(d1).filter((key) => typeof d1[key] === "number");
     const _d2 = Object.keys(d2).filter((key) => typeof d2[key] === "number");
 
@@ -19,7 +19,7 @@ function distanciaEuclidiana(d1: Data, d2: Data): number {
     return result;
 }
 
-function dissimilaridade(data: Data[]) {
+function dissimilaridade(data: ExcelData[]) {
     const size = data.length;
 
     const matrix: number[][] = [];
