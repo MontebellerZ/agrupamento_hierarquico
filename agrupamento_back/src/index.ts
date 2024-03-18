@@ -3,6 +3,7 @@ import multer from "multer";
 import readExcel from "./functions/readExcel";
 import { ExcelData } from "./types";
 import divisivo from "./functions/divisivo";
+import normalizarDados from "./functions/normalizarDados";
 
 const upload = multer({ dest: "./public/" });
 
@@ -25,6 +26,10 @@ app.post("/divisivo", upload.single("excel"), (req, res) => {
                 `Quantidade de Clusters deve ser <= ao total de items no excel (${data.length}).`
             );
     }
+
+    normalizarDados(data);
+
+    return res.send(data);
 
     const divisive = divisivo(clusters, data);
 
