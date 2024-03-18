@@ -9,3 +9,14 @@ export type DissimilarityPoint = {
     j: number;
     value: number;
 };
+
+export type LeastSimilarGroup = {
+    items: number[];
+    groupIndex: number;
+    furthestPoint: DissimilarityPoint;
+};
+
+export type RelatedGroups = {
+    a: DissimilarityPoint[];
+    b: DissimilarityPoint[];
+};

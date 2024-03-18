@@ -1,6 +1,6 @@
 import { DissimilarityPoint } from "../types";
 
-export function binarySearch(search: number, sorted: DissimilarityPoint[]) {
+export function binarySearch(search: number, sorted: number[]) {
     let min = 0;
     let max = sorted.length;
 
@@ -9,15 +9,24 @@ export function binarySearch(search: number, sorted: DissimilarityPoint[]) {
         // or (same result)
         // const mid = Math.floor((min + max) / 2);
 
-        if (sorted[mid].value < search) min = mid + 1;
+        if (sorted[mid] < search) min = mid + 1;
         else max = mid;
     }
 
     return min;
 }
 
-export function insertInSorted(obj: DissimilarityPoint, sorted: DissimilarityPoint[]) {
-    const insertPos = binarySearch(obj.value, sorted);
+export function insertDissimilarity(obj: DissimilarityPoint, sorted: DissimilarityPoint[]) {
+    const insertPos = binarySearch(
+        obj.value,
+        sorted.map(({ value }) => value)
+    );
     sorted.splice(insertPos, 0, obj);
+    return sorted;
+}
+
+export function insertNumber(n: number, sorted: number[]) {
+    const insertPos = binarySearch(n, sorted);
+    sorted.splice(insertPos, 0, n);
     return sorted;
 }

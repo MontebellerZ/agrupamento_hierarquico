@@ -8,14 +8,25 @@ const upload = multer({ dest: "./public/" });
 
 const app = express();
 
-app.post("/data", upload.single("excel"), (req, res) => {
+app.post("/divisivo", upload.single("excel"), (req, res) => {
     const excel = req.file;
+    const clusters = Number(req.body.clusters);
 
     if (!excel) return res.status(400).send("Nenhum arquivo foi enviado.");
+    if (!clusters || isNaN(clusters))
+        return res.status(400).send("Quantidade de Clusters precisa ser um número maior que 0.");
 
-    const data: ExcelData[] = readExcel(excel.path) as ExcelData[];
+    const data: ExcelData[] = readExcel(excel.path);
 
-    const divisive = divisivo(data);
+    if (clusters > data.length) {
+        return res
+            .status(400)
+            .send(
+                `Quantidade de Clusters deve ser <= ao total de items no excel (${data.length}).`
+            );
+    }
+
+    const divisive = divisivo(clusters, data);
 
     res.send(divisive);
 });
