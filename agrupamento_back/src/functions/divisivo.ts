@@ -114,8 +114,6 @@ function divisivo(clusters: number, data: ExcelData[]) {
 
         const related = getRelatedItems(group, dissimilarity);
 
-        if (groups.length === 2) console.log(group, related);
-
         const leftItems = group.items.filter(
             (n) => n !== group.furthestPoint.i && n !== group.furthestPoint.j
         );
