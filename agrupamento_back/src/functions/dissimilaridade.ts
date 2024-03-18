@@ -14,9 +14,7 @@ function distanciaEuclidiana(d1: ExcelData, d2: ExcelData): number {
         return sum + Math.pow(v1 - v2, 2);
     }, 0);
 
-    const result = Math.sqrt(totalSum);
-
-    return result;
+    return totalSum;
 }
 
 function dissimilaridade(data: ExcelData[]) {
