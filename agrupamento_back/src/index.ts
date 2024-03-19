@@ -27,9 +27,9 @@ app.post("/divisivo", upload.single("excel"), (req, res) => {
             );
     }
 
-    normalizarDados(data);
+    // normalizarDados(data);
 
-    return res.send(data);
+    // return res.send(data);
 
     const divisive = divisivo(clusters, data);
 

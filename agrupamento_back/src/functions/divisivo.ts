@@ -17,6 +17,8 @@ function sortByDistance(dissimilarity: number[][]): DissimilarityPoint[] {
     return sorted.reverse();
 }
 
+function calcCentroid(groupItems: number[], data: ExcelData[]) {}
+
 function getLeastSimilarPoints(group: number[], distances: DissimilarityPoint[]) {
     if (group.length === 0) throw new Error("Empty groups should not exist");
 
@@ -30,13 +32,16 @@ function getLeastSimilarPoints(group: number[], distances: DissimilarityPoint[])
 
 function getLeastSimilarGroup(
     groups: number[][],
-    distances: DissimilarityPoint[]
+    distances: DissimilarityPoint[],
+    data: ExcelData[]
 ): LeastSimilarGroup {
     let leastSimilar: LeastSimilarGroup | null = null;
 
     if (groups.length <= 0) throw new Error("Should have at least one group");
 
     for (let i = 0; i < groups.length; i++) {
+        const groupCentroid = calcCentroid();
+
         const furthestPoint = getLeastSimilarPoints(groups[i], distances);
 
         if (leastSimilar && leastSimilar.furthestPoint.value >= furthestPoint.value) continue;
@@ -110,7 +115,7 @@ function divisivo(clusters: number, data: ExcelData[]) {
     const sorted = sortByDistance(dissimilarity);
 
     while (groups.length < clusters) {
-        const group = getLeastSimilarGroup(groups, sorted);
+        const group = getLeastSimilarGroup(groups, sorted, data);
 
         const related = getRelatedItems(group, dissimilarity);
 
