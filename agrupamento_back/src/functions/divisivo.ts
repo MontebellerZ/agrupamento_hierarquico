@@ -1,11 +1,13 @@
-import { DissimilarityPoint, ExcelData, LeastSimilarGroup, RelatedGroups } from "../types";
+import { Point, ExcelData, Group, RelatedGroups } from "../types";
 import { insertDissimilarity, insertNumber } from "./binarySearch";
+import centroid from "./centroid";
 import dissimilaridade from "./dissimilaridade";
+import sse from "./sse";
 
-function sortByDistance(dissimilarity: number[][]): DissimilarityPoint[] {
+function sortByDistance(dissimilarity: number[][]): Point[] {
     if (!Array.isArray(dissimilarity)) throw new Error("Dissimilarity must be a valid array");
 
-    let sorted: DissimilarityPoint[] = [];
+    let sorted: Point[] = [];
 
     dissimilarity.forEach((line, i) => {
         line.forEach((value, j) => {
@@ -17,9 +19,7 @@ function sortByDistance(dissimilarity: number[][]): DissimilarityPoint[] {
     return sorted.reverse();
 }
 
-function calcCentroid(groupItems: number[], data: ExcelData[]) {}
-
-function getLeastSimilarPoints(group: number[], distances: DissimilarityPoint[]) {
+function furthestPoints(group: number[], distances: Point[]) {
     if (group.length === 0) throw new Error("Empty groups should not exist");
 
     // distances must already be sorted in descending order of value for find to work correctly
@@ -30,23 +30,13 @@ function getLeastSimilarPoints(group: number[], distances: DissimilarityPoint[])
     return max;
 }
 
-function getLeastSimilarGroup(
-    groups: number[][],
-    distances: DissimilarityPoint[],
-    data: ExcelData[]
-): LeastSimilarGroup {
-    let leastSimilar: LeastSimilarGroup | null = null;
+function getLeastSimilarGroup(groups: Group[]): Group {
+    let leastSimilar: Group | null = null;
 
     if (groups.length <= 0) throw new Error("Should have at least one group");
 
     for (let i = 0; i < groups.length; i++) {
-        const groupCentroid = calcCentroid();
-
-        const furthestPoint = getLeastSimilarPoints(groups[i], distances);
-
-        if (leastSimilar && leastSimilar.furthestPoint.value >= furthestPoint.value) continue;
-
-        leastSimilar = { items: groups[i], groupIndex: i, furthestPoint };
+        if (!leastSimilar || leastSimilar.sse < groups[i].sse) leastSimilar = groups[i];
     }
 
     if (!leastSimilar) throw new Error("leastSimilar should find one group");
@@ -54,28 +44,24 @@ function getLeastSimilarGroup(
     return leastSimilar;
 }
 
-function getRelatedItems(group: LeastSimilarGroup, dissimilarity: number[][]): RelatedGroups {
-    const itemA = group.furthestPoint.i;
-    const itemB = group.furthestPoint.j;
+function getRelatedItems(group: Group, dissimilarity: number[][]): RelatedGroups {
+    const itemA = group.furthests.i;
+    const itemB = group.furthests.j;
 
-    const lineA = dissimilarity[itemA].map(
-        (value, j): DissimilarityPoint => ({ i: itemA, j, value: value })
-    );
-    const lineB = dissimilarity[itemB].map(
-        (value, j): DissimilarityPoint => ({ i: itemB, j, value: value })
-    );
+    const lineA = dissimilarity[itemA].map((value, j): Point => ({ i: itemA, j, value: value }));
+    const lineB = dissimilarity[itemB].map((value, j): Point => ({ i: itemB, j, value: value }));
 
     const columnA = dissimilarity
         .slice(itemA)
-        .map((d, i): DissimilarityPoint => ({ i: itemA, j: i + itemA, value: d[itemA] }));
+        .map((d, i): Point => ({ i: itemA, j: i + itemA, value: d[itemA] }));
     const columnB = dissimilarity
         .slice(itemB)
-        .map((d, i): DissimilarityPoint => ({ i: itemB, j: i + itemB, value: d[itemB] }));
+        .map((d, i): Point => ({ i: itemB, j: i + itemB, value: d[itemB] }));
 
-    const relatedA: DissimilarityPoint[] = lineA
+    const relatedA: Point[] = lineA
         .concat(columnA)
         .filter((r) => r.j !== itemB && r.j !== r.i && group.items.includes(r.j));
-    const relatedB: DissimilarityPoint[] = lineB
+    const relatedB: Point[] = lineB
         .concat(columnB)
         .filter((r) => r.j !== itemA && r.j !== r.i && group.items.includes(r.j));
 
@@ -83,14 +69,25 @@ function getRelatedItems(group: LeastSimilarGroup, dissimilarity: number[][]): R
 }
 
 function generateNewGroups(
-    items: number[],
+    group: Group,
     related: RelatedGroups,
-    furthestPoint: DissimilarityPoint
-) {
-    const newGroups: { a: number[]; b: number[] } = { a: [], b: [] };
+    furthests: Point,
+    data: ExcelData[],
+    distances: Point[]
+): Group[] {
+    const leftItems = group.items.filter((n) => n !== group.furthests.i && n !== group.furthests.j);
 
-    for (let i = 0; i < items.length; i++) {
-        const groupId = items[i];
+    if (leftItems.length !== related.b.length || leftItems.length !== related.a.length) {
+        throw new Error("Related arrays should have the leftItems length");
+    }
+
+    const newItems = {
+        a: new Array<number>(),
+        b: new Array<number>(),
+    };
+
+    for (let i = 0; i < leftItems.length; i++) {
+        const groupId = leftItems[i];
         const valueA = related.a[i];
         const valueB = related.b[i];
 
@@ -98,38 +95,59 @@ function generateNewGroups(
             throw new Error("groupId should be equal to the j attributes of the items");
         }
 
-        valueA.value < valueB.value ? newGroups.a.push(groupId) : newGroups.b.push(groupId);
+        valueA.value < valueB.value ? newItems.a.push(groupId) : newItems.b.push(groupId);
     }
 
-    insertNumber(furthestPoint.i, newGroups.a);
-    insertNumber(furthestPoint.j, newGroups.b);
+    insertNumber(furthests.i, newItems.a);
+    insertNumber(furthests.j, newItems.b);
 
-    return newGroups;
+    const newCentroids = {
+        a: centroid(newItems.a, data),
+        b: centroid(newItems.b, data),
+    };
+    const newSSE = {
+        a: sse(newItems.a, newCentroids.a, data),
+        b: sse(newItems.b, newCentroids.b, data),
+    };
+    const newFurthests = {
+        a: furthestPoints(newItems.a, distances),
+        b: furthestPoints(newItems.b, distances),
+    };
+
+    return [
+        { items: newItems.a, centroid: newCentroids.a, sse: newSSE.a, furthests: newFurthests.a },
+        { items: newItems.b, centroid: newCentroids.b, sse: newSSE.b, furthests: newFurthests.b },
+    ];
 }
 
 function divisivo(clusters: number, data: ExcelData[]) {
-    const groups = [data.map((_, id) => id)];
-
     const dissimilarity = dissimilaridade(data);
+    const distances = sortByDistance(dissimilarity);
 
-    const sorted = sortByDistance(dissimilarity);
+    const initialItems = data.map((_, id) => id);
+    const initialCentroid = centroid(initialItems, data);
+    const initialSSE = sse(initialItems, initialCentroid, data);
+    const initialFurthest = furthestPoints(initialItems, distances);
+
+    const groups: Group[] = [
+        {
+            items: initialItems,
+            centroid: initialCentroid,
+            sse: initialSSE,
+            furthests: initialFurthest,
+        },
+    ];
 
     while (groups.length < clusters) {
-        const group = getLeastSimilarGroup(groups, sorted, data);
+        const group = getLeastSimilarGroup(groups);
 
         const related = getRelatedItems(group, dissimilarity);
 
-        const leftItems = group.items.filter(
-            (n) => n !== group.furthestPoint.i && n !== group.furthestPoint.j
-        );
+        const newGroups = generateNewGroups(group, related, group.furthests, data, distances);
 
-        if (leftItems.length !== related.b.length || leftItems.length !== related.a.length) {
-            throw new Error("Related arrays should have the leftItems length");
-        }
+        const groupIndex = groups.findIndex((g) => g === group);
 
-        const newGroups = generateNewGroups(leftItems, related, group.furthestPoint);
-
-        groups.splice(group.groupIndex, 1, newGroups.a, newGroups.b);
+        groups.splice(groupIndex, 1, ...newGroups);
     }
 
     return groups;

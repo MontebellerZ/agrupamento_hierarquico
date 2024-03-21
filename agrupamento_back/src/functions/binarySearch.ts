@@ -1,4 +1,4 @@
-import { DissimilarityPoint } from "../types";
+import { Point } from "../types";
 
 export function binarySearch(search: number, sorted: number[]) {
     let min = 0;
@@ -16,7 +16,7 @@ export function binarySearch(search: number, sorted: number[]) {
     return min;
 }
 
-export function insertDissimilarity(obj: DissimilarityPoint, sorted: DissimilarityPoint[]) {
+export function insertDissimilarity(obj: Point, sorted: Point[]) {
     const insertPos = binarySearch(
         obj.value,
         sorted.map(({ value }) => value)

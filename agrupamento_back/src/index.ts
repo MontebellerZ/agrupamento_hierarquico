@@ -27,13 +27,13 @@ app.post("/divisivo", upload.single("excel"), (req, res) => {
             );
     }
 
-    // normalizarDados(data);
-
-    // return res.send(data);
+    normalizarDados(data);
 
     const divisive = divisivo(clusters, data);
 
-    res.send(divisive);
+    const indexes = divisive.map((g) => g.items);
+
+    res.send(indexes);
 });
 
 app.listen(3001, () => {

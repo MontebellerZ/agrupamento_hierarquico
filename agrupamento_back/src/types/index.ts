@@ -4,19 +4,20 @@ export type ExcelData = {
 
 export type SheetType = "Dissimilaridade" | "Agregativo" | "Divisivo";
 
-export type DissimilarityPoint = {
+export type Point = {
     i: number;
     j: number;
     value: number;
 };
 
-export type LeastSimilarGroup = {
-    items: number[];
-    groupIndex: number;
-    furthestPoint: DissimilarityPoint;
+export type RelatedGroups = {
+    a: Point[];
+    b: Point[];
 };
 
-export type RelatedGroups = {
-    a: DissimilarityPoint[];
-    b: DissimilarityPoint[];
+export type Group = {
+    items: number[];
+    centroid: ExcelData;
+    sse: number;
+    furthests: Point;
 };
