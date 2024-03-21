@@ -4,38 +4,18 @@ import readExcel from "./functions/readExcel";
 import { ExcelData } from "./types";
 import divisivo from "./functions/divisivo";
 import normalizarDados from "./functions/normalizarDados";
+import initialize from "./functions/initialize";
+import route_agregativo from "./route/route_agregativo";
+import route_divisivo from "./route/route_divisivo";
 
 const upload = multer({ dest: "./public/" });
 
 const app = express();
 
-app.post("/divisivo", upload.single("excel"), (req, res) => {
-    const excel = req.file;
-    const clusters = Number(req.body.clusters);
+app.post("/divisivo", upload.single("excel"), initialize, route_divisivo);
 
-    if (!excel) return res.status(400).send("Nenhum arquivo foi enviado.");
-    if (!clusters || isNaN(clusters))
-        return res.status(400).send("Quantidade de Clusters precisa ser um número maior que 0.");
-
-    const data: ExcelData[] = readExcel(excel.path);
-
-    if (clusters > data.length) {
-        return res
-            .status(400)
-            .send(
-                `Quantidade de Clusters deve ser <= ao total de items no excel (${data.length}).`
-            );
-    }
-
-    normalizarDados(data);
-
-    const divisive = divisivo(clusters, data);
-
-    const indexes = divisive.map((g) => g.items);
-
-    res.send(indexes);
-});
+app.post("/aglomerativo", upload.single("excel"), initialize, route_agregativo);
 
 app.listen(3001, () => {
-    console.log("Listening on port 3001");
+	console.log("Listening on port 3001");
 });
