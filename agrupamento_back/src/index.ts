@@ -1,9 +1,5 @@
 import express from "express";
 import multer from "multer";
-import readExcel from "./functions/readExcel";
-import { ExcelData } from "./types";
-import divisivo from "./functions/divisivo";
-import normalizarDados from "./functions/normalizarDados";
 import initialize from "./functions/initialize";
 import route_agregativo from "./route/route_agregativo";
 import route_divisivo from "./route/route_divisivo";
