@@ -1,8 +1,8 @@
 import express from "express";
 import multer from "multer";
 import initialize from "./functions/initialize";
-import route_aglomerativo from "./route/route_aglomerativo";
-import route_divisivo from "./route/route_divisivo";
+import route_aglomerativo from "./routes/route_aglomerativo";
+import route_divisivo from "./routes/route_divisivo";
 
 const upload = multer({ dest: "./public/" });
 
