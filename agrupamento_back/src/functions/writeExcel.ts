@@ -4,7 +4,7 @@ function writeDissimilaridade() {}
 
 function writeDivisivo() {}
 
-function writeAgregativo() {}
+function writeaglomerativo() {}
 
 function writeExcel(path: string, sheet: SheetType, data: ExcelData[]) {
     if (!path || !sheet || !data) throw new Error("Missing data to write excel");
@@ -12,8 +12,8 @@ function writeExcel(path: string, sheet: SheetType, data: ExcelData[]) {
     switch (sheet) {
         case "Dissimilaridade":
             return writeDissimilaridade();
-        case "Agregativo":
-            return writeAgregativo();
+        case "aglomerativo":
+            return writeaglomerativo();
         case "Divisivo":
             return writeDivisivo();
     }

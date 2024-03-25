@@ -9,7 +9,7 @@ export type ExcelData = {
 	[name: string]: string | number;
 };
 
-export type SheetType = "Dissimilaridade" | "Agregativo" | "Divisivo";
+export type SheetType = "Dissimilaridade" | "aglomerativo" | "Divisivo";
 
 export type Point = {
 	i: number;
@@ -25,6 +25,6 @@ export type RelatedGroups = {
 export type Group = {
 	items: number[];
 	centroid: ExcelData;
-	sse: number;
-	furthests: Point;
+	sse?: number;
+	furthests?: Point;
 };
