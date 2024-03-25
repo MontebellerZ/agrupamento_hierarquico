@@ -1,7 +1,43 @@
-import { ExcelData, Group, Point } from "../types";
+import { AglomerativeResults, ExcelData, Group, Point } from "../types";
 import dissimilaridade from "./dissimilaridade";
 import centroid from "./centroid";
 import sortByDistance from "./sortByDistance";
+
+function singleLinkage(): Group[] {
+    return [];
+}
+
+function completeLinkage(): Group[] {
+    return [];
+}
+
+function centroidLinkage(clusters: number, data: ExcelData[]): Group[] {
+    const groups: Group[] = data.map((_, id) => {
+        const groupItems = [id];
+        const groupCentroid = centroid(groupItems, data);
+
+        return { items: groupItems, centroid: groupCentroid };
+    });
+
+    while (groups.length > clusters) {
+        const dissimilarity = dissimilaridade(groups.map((g) => g.centroid));
+        const distances = sortByDistance(dissimilarity);
+
+        const similarGroups = getMostSimilarsGroups(groups, distances);
+
+        const joinedGroup = generateNewGroup(similarGroups, data);
+
+        similarGroups.forEach((g1) => {
+            const groupId = groups.findIndex((g2) => g1 === g2);
+            if (groupId < 0) throw new Error("The group should exist in the array");
+            groups.splice(groupId, 1);
+        });
+
+        groups.push(joinedGroup);
+    }
+
+    return groups;
+}
 
 function getMostSimilarsGroups(groups: Group[], distances: Point[]): Group[] {
     for (let k = distances.length - 1; k >= 0; k--) {
@@ -20,32 +56,14 @@ function generateNewGroup(groups: Group[], data: ExcelData[]): Group {
     return { items: newItems, centroid: newCentroid };
 }
 
-function aglomerativo(clusters: number, data: ExcelData[]): Group[] {
-    const groups: Group[] = data.map((_, id) => {
-        const groupItems = [id];
-        const groupCentroid = centroid(groupItems, data);
+function aglomerativo(clusters: number, data: ExcelData[]): AglomerativeResults {
+    const results: AglomerativeResults = {
+        singleLinkage: singleLinkage(),
+        completeLinkage: completeLinkage(),
+        centroidLinkage: centroidLinkage(clusters, data),
+    };
 
-        return { items: groupItems, centroid: groupCentroid };
-    });
-
-    while (groups.length > clusters) {
-        const dissimilarity = dissimilaridade(groups.map((g) => g.centroid));
-        const distances = sortByDistance(dissimilarity);
-
-        const similarGroups = getMostSimilarsGroups(groups, distances);
-
-        const joinedGroup = generateNewGroup(similarGroups, data);
-
-        similarGroups.forEach((g1) => {
-            const groupId = groups.findIndex((g2) => g1 === g2);
-            if (groupId < 0) throw new Error("Should the group in the array");
-            groups.splice(groupId, 1);
-        });
-
-        groups.push(joinedGroup);
-    }
-
-    return groups;
+    return results;
 }
 
 export default aglomerativo;

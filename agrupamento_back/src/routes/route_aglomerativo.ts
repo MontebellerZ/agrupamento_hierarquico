@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { RequestAgregamento } from "../types";
+import { Group, RequestAgregamento } from "../types";
 import normalizarDados from "../functions/normalizarDados";
 import aglomerativo from "../functions/aglomerativo";
 
@@ -13,7 +13,11 @@ function route_aglomerativo(req: RequestAgregamento, res: Response) {
 
     const aglomerative = aglomerativo(clusters, data);
 
-    const indexes = aglomerative.map((g) => g.items);
+    const indexes = {
+        singleLinkage: aglomerative.singleLinkage.map((g) => g.items),
+        completeLinkage: aglomerative.completeLinkage.map((g) => g.items),
+        centroidLinkage: aglomerative.centroidLinkage.map((g) => g.items),
+    };
 
     res.send(indexes);
 }
