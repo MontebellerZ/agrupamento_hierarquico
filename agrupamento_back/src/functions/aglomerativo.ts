@@ -11,8 +11,7 @@ function completeLinkage(): Group[] {
     return [];
 }
 
-// function centroidLinkage(clusters: number, data: ExcelData[]): Group[] {
-function centroidLinkage(clusters: number, data: ExcelData[]): any {
+function centroidLinkage(clusters: number, data: ExcelData[]): Group[] {
     const groups: Group[] = data.map((_, id) => ({
         items: [id],
         centroid: centroid([id], data),
