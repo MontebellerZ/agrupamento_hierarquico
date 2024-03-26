@@ -1,25 +1,48 @@
-import { Response } from "express";
-import { Group, RequestAgregamento } from "../types";
+import { NextFunction, Response } from "express";
+import { AglomerativeResults, Group, RequestAgregamento } from "../types";
 import normalizarDados from "../functions/normalizarDados";
-import aglomerativo from "../functions/aglomerativo";
+import aglomerativo_centroid from "../functions/aglomerativo_centroid";
+import aglomerativo_single from "../functions/aglomerativo_single";
+import aglomerativo_complete from "../functions/aglomerativo_complete";
 
-function route_aglomerativo(req: RequestAgregamento, res: Response) {
-    const data = req.excelData;
-    const clusters = req.clusters;
+const AVAILABLE_TYPES = [
+    { key: "singleLinkage", func: aglomerativo_single },
+    { key: "completeLinkage", func: aglomerativo_complete },
+    { key: "centroidLinkage", func: aglomerativo_centroid },
+];
 
-    if (!data || !clusters) throw new Error("Excel data ou Clusters não foi encontrado");
+function route_aglomerativo(req: RequestAgregamento, res: Response, next: NextFunction) {
+    try {
+        const type = req.params.type;
 
-    normalizarDados(data);
+        if (type && !AVAILABLE_TYPES.some(({ key }) => key === type)) {
+            const types = AVAILABLE_TYPES.map((t) => `"${t.key}"`).join(", ");
+            throw new Error("Type must be not defined or equal to either: " + types);
+        }
 
-    const aglomerative = aglomerativo(clusters, data);
+        const data = req.excelData;
+        const clusters = req.clusters;
 
-    const indexes = {
-        singleLinkage: aglomerative.singleLinkage.map((g) => g.items),
-        completeLinkage: aglomerative.completeLinkage.map((g) => g.items),
-        centroidLinkage: aglomerative.centroidLinkage.map((g) => g.items),
-    };
+        if (!data || !clusters) throw new Error("Excel data or clusters not set");
 
-    res.send(indexes);
+        normalizarDados(data);
+
+        const results: AglomerativeResults = {};
+
+        AVAILABLE_TYPES.forEach(({ key, func }) => {
+            if (!type || type === key) results[key] = func(clusters, data);
+        });
+
+        const indexes: { [type: string]: number[][] } = {};
+
+        for (const key in results) {
+            indexes[key] = results[key].map((g) => g.items);
+        }
+
+        res.send(indexes);
+    } catch (err) {
+        next(err);
+    }
 }
 
 export default route_aglomerativo;

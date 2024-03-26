@@ -4,7 +4,7 @@
     "main": "src/index.ts",
     "scripts": {
         "start": "ts-node src/index.ts",
-        "ndm": "nodemon src/index.ts --ignore ./public"
+        "ndm": "nodemon src/index.ts --ignore ./public --ignore ./*.json"
     },
     "license": "MIT",
     "dependencies": {

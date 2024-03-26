@@ -24,13 +24,11 @@ export type RelatedGroups = {
 
 export type Group = {
     items: number[];
-    centroid: ExcelData;
+    centroid?: ExcelData;
     sse?: number;
     furthests?: Point;
 };
 
 export type AglomerativeResults = {
-    singleLinkage: Group[];
-    completeLinkage: Group[];
-    centroidLinkage: Group[];
+    [linkage: string]: Group[];
 };
