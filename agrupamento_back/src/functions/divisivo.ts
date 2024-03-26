@@ -1,19 +1,21 @@
 import { Point, ExcelData, Group, RelatedGroups } from "../types";
-import { insertNumber } from "./binarySearch";
+import { insertSortedNumber } from "./binarySearch";
 import centroid from "./centroid";
-import dissimilaridade from "./dissimilaridade";
+import { dissimilaridade } from "./dissimilaridade";
 import sortByDistance from "./sortByDistance";
 import sse from "./sse";
 
 function furthestPoints(group: number[], distances: Point[]): Point {
     if (group.length === 0) throw new Error("Empty groups should not exist");
 
-    // distances must already be sorted in descending order of value for find to work correctly
-    const max = distances.find((d) => group.includes(d.i) && group.includes(d.j));
+    // distances must be sorted in ascending order of value for this to work correctly
+    for (let k = distances.length - 1; k >= 0; k--) {
+        if (group.includes(distances[k].i) && group.includes(distances[k].j)) {
+            return distances[k];
+        }
+    }
 
-    if (!max) throw new Error("Max should not be undefined");
-
-    return max;
+    throw new Error("Max should not be undefined");
 }
 
 function getLeastSimilarGroup(groups: Group[]): Group {
@@ -86,8 +88,8 @@ function generateNewGroups(
         valueA.value < valueB.value ? newItems.a.push(groupId) : newItems.b.push(groupId);
     }
 
-    insertNumber(furthests.i, newItems.a);
-    insertNumber(furthests.j, newItems.b);
+    insertSortedNumber(furthests.i, newItems.a);
+    insertSortedNumber(furthests.j, newItems.b);
 
     const newCentroids = {
         a: centroid(newItems.a, data),

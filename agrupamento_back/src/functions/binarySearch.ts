@@ -16,7 +16,17 @@ export function binarySearch(search: number, sorted: number[]) {
     return min;
 }
 
-export function insertDissimilarity(obj: Point, sorted: Point[]) {
+export function insertSortedPoint(obj: Point, sorted: Point[]) {
+    if (sorted.length <= 0 || obj.value >= sorted[sorted.length - 1].value) {
+        sorted.push(obj);
+        return sorted;
+    }
+
+    if (obj.value <= sorted[0].value) {
+        sorted.unshift(obj);
+        return sorted;
+    }
+
     const insertPos = binarySearch(
         obj.value,
         sorted.map(({ value }) => value)
@@ -25,7 +35,7 @@ export function insertDissimilarity(obj: Point, sorted: Point[]) {
     return sorted;
 }
 
-export function insertNumber(n: number, sorted: number[]) {
+export function insertSortedNumber(n: number, sorted: number[]) {
     const insertPos = binarySearch(n, sorted);
     sorted.splice(insertPos, 0, n);
     return sorted;

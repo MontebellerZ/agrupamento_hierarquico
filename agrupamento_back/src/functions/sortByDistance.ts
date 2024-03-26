@@ -1,5 +1,5 @@
 import { Point } from "../types";
-import { insertDissimilarity } from "./binarySearch";
+import { insertSortedPoint } from "./binarySearch";
 
 function sortByDistance(dissimilarity: number[][]): Point[] {
     if (!Array.isArray(dissimilarity)) throw new Error("Dissimilarity must be a valid array");
@@ -8,12 +8,11 @@ function sortByDistance(dissimilarity: number[][]): Point[] {
 
     dissimilarity.forEach((line, i) => {
         line.forEach((value, j) => {
-            insertDissimilarity({ value, i, j }, sorted);
+            insertSortedPoint({ value, i, j }, sorted);
         });
     });
 
-    // reverse() is needed to sort the array in a descending order of value
-    return sorted.reverse();
+    return sorted;
 }
 
 export default sortByDistance;

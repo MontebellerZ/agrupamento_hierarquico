@@ -1,5 +1,5 @@
 import { AglomerativeResults, ExcelData, Group, Point } from "../types";
-import dissimilaridade from "./dissimilaridade";
+import { addDissimilaridade, dissimilaridade, removeDissimilaridade } from "./dissimilaridade";
 import centroid from "./centroid";
 import sortByDistance from "./sortByDistance";
 
@@ -12,16 +12,20 @@ function completeLinkage(): Group[] {
 }
 
 function centroidLinkage(clusters: number, data: ExcelData[]): Group[] {
-    const groups: Group[] = data.map((_, id) => {
-        const groupItems = [id];
-        const groupCentroid = centroid(groupItems, data);
+    const groups: Group[] = data.map((_, id) => ({
+        items: [id],
+        centroid: centroid([id], data),
+    }));
 
-        return { items: groupItems, centroid: groupCentroid };
-    });
+    const dissimilarity = dissimilaridade(groups.map((g) => g.centroid));
 
     while (groups.length > clusters) {
-        const dissimilarity = dissimilaridade(groups.map((g) => g.centroid));
-        const distances = sortByDistance(dissimilarity);
+        const time = Date.now();
+        // const distances = sortByDistance(dissimilarity);
+        const distances = dissimilarity.flatMap((a, i) =>
+            a.map((v, j): Point => ({ value: v, i, j }))
+        );
+        console.log("sort:", Date.now() - time);
 
         const similarGroups = getMostSimilarsGroups(groups, distances);
 
@@ -31,9 +35,14 @@ function centroidLinkage(clusters: number, data: ExcelData[]): Group[] {
             const groupId = groups.findIndex((g2) => g1 === g2);
             if (groupId < 0) throw new Error("The group should exist in the array");
             groups.splice(groupId, 1);
+            removeDissimilaridade(dissimilarity, groupId);
         });
 
         groups.push(joinedGroup);
+        addDissimilaridade(
+            dissimilarity,
+            groups.map((g) => g.centroid)
+        );
     }
 
     return groups;
