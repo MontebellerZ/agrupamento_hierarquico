@@ -1,16 +1,11 @@
 import { Point } from "../types";
-import { insertSortedPoint } from "./binarySearch";
 
 function sortByDistance(dissimilarity: number[][]): Point[] {
     if (!Array.isArray(dissimilarity)) throw new Error("Dissimilarity must be a valid array");
 
-    let sorted: Point[] = [];
-
-    dissimilarity.forEach((line, i) => {
-        line.forEach((value, j) => {
-            insertSortedPoint({ value, i, j }, sorted);
-        });
-    });
+    const sorted: Point[] = dissimilarity
+        .flatMap((a, i): Point[] => a.map((v, j): Point => ({ value: v, i, j })))
+        .sort((a, b) => a.value - b.value);
 
     return sorted;
 }

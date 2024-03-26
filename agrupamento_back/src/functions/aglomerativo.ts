@@ -11,7 +11,8 @@ function completeLinkage(): Group[] {
     return [];
 }
 
-function centroidLinkage(clusters: number, data: ExcelData[]): Group[] {
+// function centroidLinkage(clusters: number, data: ExcelData[]): Group[] {
+function centroidLinkage(clusters: number, data: ExcelData[]): any {
     const groups: Group[] = data.map((_, id) => ({
         items: [id],
         centroid: centroid([id], data),
@@ -20,12 +21,7 @@ function centroidLinkage(clusters: number, data: ExcelData[]): Group[] {
     const dissimilarity = dissimilaridade(groups.map((g) => g.centroid));
 
     while (groups.length > clusters) {
-        const time = Date.now();
-        // const distances = sortByDistance(dissimilarity);
-        const distances = dissimilarity.flatMap((a, i) =>
-            a.map((v, j): Point => ({ value: v, i, j }))
-        );
-        console.log("sort:", Date.now() - time);
+        const distances = sortByDistance(dissimilarity);
 
         const similarGroups = getMostSimilarsGroups(groups, distances);
 
