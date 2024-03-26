@@ -15,21 +15,6 @@ function getMostSimilarsGroups(groups: Group[], distances: Point[]): Group[] {
 
         if (g1 === g2) continue;
 
-        console.log(
-            "\n\n\n\n\ndistances:",
-            distances.slice(k - 5, k + 5),
-            "\n\ndistanes[k]:",
-            distances[k],
-            "\n\nd1:",
-            d1,
-            "\n\nd2:",
-            d2,
-            "\n\ng1:",
-            g1,
-            "\n\ng2:",
-            g2
-        );
-
         return [g1!, g2!];
     }
 

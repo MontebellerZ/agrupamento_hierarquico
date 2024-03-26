@@ -3,6 +3,7 @@ import { Request } from "express";
 export type RequestAgregamento = Request & {
     excelData?: ExcelData[];
     clusters?: number;
+    file?: Express.Multer.File;
 };
 
 export type ExcelData = {

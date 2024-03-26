@@ -5,6 +5,7 @@ function sortByDistance(dissimilarity: number[][]): Point[] {
 
     const sorted: Point[] = dissimilarity
         .flatMap((a, i): Point[] => a.map((v, j): Point => ({ value: v, i, j })))
+        .filter((a) => a.value !== 0)
         .sort((a, b) => a.value - b.value);
 
     return sorted;

@@ -1,10 +1,10 @@
-import { AglomerativeResults, ExcelData, Group, Point } from "../types";
-import { addDissimilaridade, dissimilaridade, removeDissimilaridade } from "./dissimilaridade";
+import { ExcelData, Group, Point } from "../types";
+import { dissimilaridade } from "./dissimilaridade";
 import centroid from "./centroid";
 import sortByDistance from "./sortByDistance";
 
 function getMostSimilarsGroups(groups: Group[], distances: Point[]): Group[] {
-    for (let k = distances.length - 1; k >= 0; k--) {
+    for (let k = 0; k < distances.length; k++) {
         const d1 = distances[k].i;
         const d2 = distances[k].j;
 

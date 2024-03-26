@@ -1,6 +1,5 @@
 import { NextFunction, Response } from "express";
-import { AglomerativeResults, Group, RequestAgregamento } from "../types";
-import normalizarDados from "../functions/normalizarDados";
+import { AglomerativeResults, RequestAgregamento } from "../types";
 import aglomerativo_centroid from "../functions/aglomerativo_centroid";
 import aglomerativo_single from "../functions/aglomerativo_single";
 import aglomerativo_complete from "../functions/aglomerativo_complete";
@@ -24,8 +23,6 @@ function route_aglomerativo(req: RequestAgregamento, res: Response, next: NextFu
         const clusters = req.clusters;
 
         if (!data || !clusters) throw new Error("Excel data or clusters not set");
-
-        normalizarDados(data);
 
         const results: AglomerativeResults = {};
 

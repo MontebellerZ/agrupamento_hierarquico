@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import { ExcelData, RequestAgregamento } from "../types";
 import readExcel from "./readExcel";
+import normalizarDados from "./normalizarDados";
 
 function initialize(req: RequestAgregamento, res: Response, next: NextFunction) {
     const excel = req.file;
@@ -19,6 +20,8 @@ function initialize(req: RequestAgregamento, res: Response, next: NextFunction) 
                 `Quantidade de Clusters deve ser > 0 e <= ao total de items no excel (${data.length}).`
             );
     }
+
+    normalizarDados(data);
 
     req.clusters = clusters;
     req.excelData = data;

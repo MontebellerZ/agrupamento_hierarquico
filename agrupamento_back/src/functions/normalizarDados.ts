@@ -1,6 +1,8 @@
 import { ExcelData } from "../types";
 
 function normalizarDados(data: ExcelData[]): ExcelData[] {
+    if (!data) throw new Error("Excel data not set");
+
     const headers = Object.keys(data[0]);
 
     headers.forEach((h) => {
