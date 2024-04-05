@@ -1,24 +1,21 @@
 import { ExcelData, Group, Point } from "../types";
 import { dissimilaridade } from "./dissimilaridade";
 import centroid from "./centroid";
-import sortByDistance from "./sortByDistance";
 
-function getMostSimilarsGroups(groups: Group[], distances: Point[]): Group[] {
-    for (let k = 0; k < distances.length; k++) {
-        const d1 = distances[k].i;
-        const d2 = distances[k].j;
+function getMinPoint(dissimilarity: number[][]): Point {
+    let min: Point | undefined = undefined;
 
-        if (d1 === d2) continue;
+    for (let i = 0; i < dissimilarity.length; i++) {
+        for (let j = 0; j < dissimilarity[i].length; j++) {
+            if (i === j || (min && min.value <= dissimilarity[i][j])) continue;
 
-        const g1 = groups.find((g) => g.items.includes(d1));
-        const g2 = groups.find((g) => g.items.includes(d2));
-
-        if (g1 === g2) continue;
-
-        return [g1!, g2!];
+            min = { i, j, value: dissimilarity[i][j] };
+        }
     }
 
-    throw new Error("Should find at least one similar group.");
+    if (!min) throw new Error("Should find at least one similar group.");
+
+    return min;
 }
 
 function generateNewGroup(groups: Group[], data: ExcelData[]): Group {
@@ -34,19 +31,16 @@ function aglomerativo_complete(clusters: number, data: ExcelData[]): Group[] {
     }));
 
     const dissimilarity = dissimilaridade(data);
-    const distances = sortByDistance(dissimilarity);
 
     while (groups.length > clusters) {
-        const similarGroups = getMostSimilarsGroups(groups, distances);
+        const minPoint = getMinPoint(dissimilarity);
+
+        const similarGroups = [groups[minPoint.i], groups[minPoint.j]];
 
         const joinedGroup = generateNewGroup(similarGroups, data);
 
-        similarGroups.forEach((g1) => {
-            const groupId = groups.findIndex((g2) => g1 === g2);
-            if (groupId < 0) throw new Error("The group should exist in the array");
-            groups.splice(groupId, 1);
-        });
-
+        groups.splice(Math.max(minPoint.i, minPoint.j), 1);
+        groups.splice(Math.min(minPoint.i, minPoint.j), 1);
         groups.push(joinedGroup);
     }
 

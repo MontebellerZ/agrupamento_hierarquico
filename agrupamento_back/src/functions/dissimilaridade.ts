@@ -1,4 +1,4 @@
-import { ExcelData } from "../types";
+import { ExcelData, Point } from "../types";
 import distanciaEuclidiana from "./distanciaEuclidiana";
 
 export function dissimilaridade(data: ExcelData[]): number[][] {
@@ -46,5 +46,34 @@ export function removeDissimilaridade(oldDissimilarity: number[][], removeDataIn
 
     for (let i = removeDataIndex; i < oldDissimilarity.length; i++) {
         oldDissimilarity[i].splice(removeDataIndex, 1);
+    }
+}
+
+export function joinMaxDissimilaridade(dissimilarity: number[][], point: Point) {
+    const oldPoints: { a: Point[]; b: Point[] } = { a: [], b: [] };
+
+    oldPoints.a.push(
+        ...dissimilarity[point.i].map((value, k): Point => ({ i: point.i, j: k, value }))
+    );
+
+    oldPoints.b.push(
+        ...dissimilarity[point.j].map((value, k): Point => ({ i: point.j, j: k, value }))
+    );
+
+    for (let k = point.i + 1; k < dissimilarity.length; k++) {
+        oldPoints.a.push({ i: k, j: point.i, value: dissimilarity[k][point.i] });
+    }
+
+    for (let k = point.j + 1; k < dissimilarity.length; k++) {
+        oldPoints.b.push({ i: k, j: point.j, value: dissimilarity[k][point.j] });
+    }
+
+    if (oldPoints.a.length !== oldPoints.b.length) {
+        throw new Error("Old points arrays should not have different lengths");
+    }
+
+    for (let k = 0; k < dissimilarity.length; k++) {
+        let coords1 = [k, point.i];
+        let coords2 = [k, point.j];
     }
 }
